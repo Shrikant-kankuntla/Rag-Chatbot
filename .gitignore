@@ -1,16 +1,27 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Virtual Environment
 venv/
-.env
+.env/
+.venv/
 
-# Database
-/db
+# Database / Vector Store
+code/db/
+*.sqlite3
 
-# VS Code
+# Streamlit
+.streamlit/
+
+# VS Code / IDE
 .vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # OS Files
 .DS_Store
