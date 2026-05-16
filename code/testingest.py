@@ -12,9 +12,9 @@ CHROMA_PATH = os.path.join(BASE_DIR, "db")
 
 # ✅ Both .md files mapped to their source labels
 FILES = {
-    "india.md":  os.path.join(BASE_DIR, "C:/Users/shrik/Desktop/Rag/data", "books", "india.md"),
-    "greek.md":  os.path.join(BASE_DIR, "C:/Users/shrik/Desktop/Rag/data", "books", "greek.md"),
-    "rome.md":  os.path.join(BASE_DIR, "C:/Users/shrik/Desktop/Rag/data", "books", "rome.md"),
+    "india.md":  os.path.join(BASE_DIR, "C:/Users/{ur_user}/Desktop/Rag/data", "books", "india.md"),
+    "greek.md":  os.path.join(BASE_DIR, "C:/Users/{ur_user}/Desktop/Rag/data", "books", "greek.md"),
+    "rome.md":  os.path.join(BASE_DIR, "C:/Users/{ur_user}/Desktop/Rag/data", "books", "rome.md"),
 }
 
 def clean_text(text):
