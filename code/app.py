@@ -8,7 +8,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 
-# ---------------- CONFIG ----------------
 CHROMA_PATH = "db"
 
 PROMPT_TEMPLATE = """
@@ -34,7 +33,6 @@ Question:
 Answer:
 """
 
-# ---------------- STYLE (PRO LOOK) ----------------
 st.set_page_config(page_title="RAG Assistant", page_icon="💬", layout="wide")
 
 st.markdown("""
@@ -75,7 +73,6 @@ section[data-testid="stSidebar"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- HEADER ----------------
 st.markdown("""
 <div class="header">
   <h2> RAG Assistant</h2>
@@ -83,7 +80,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------- HELPERS ----------------
 def is_realtime_query(query):
     keywords = ["time", "date", "today", "current", "now", "year", "month", "clock"]
     return any(k in query.lower() for k in keywords)
@@ -114,7 +110,6 @@ def format_chat_download(chat_history):
         lines.append(f"{who}: {msg}")
     return "\n\n".join(lines)
 
-# ---------------- LOAD ----------------
 @st.cache_resource
 def load_db():
     emb = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
@@ -127,18 +122,16 @@ def load_model():
 db = load_db()
 model = load_model()
 
-# ---------------- STATE ----------------
 if "history" not in st.session_state:
     st.session_state.history = []
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# ---------------- SIDEBAR ----------------
-st.sidebar.title("🧭 Control Panel")
+st.sidebar.title(" Control Panel")
 
 st.sidebar.markdown("**Recent Messages**")
 for role, msg in st.session_state.chat_history[-8:]:
-    icon = "🧑" if role == "user" else "🤖"
+    icon = "" if role == "user" else ""
     st.sidebar.write(f"{icon} {msg[:40]}...")
 
 if st.sidebar.button("🧹 Clear Chat"):
@@ -146,10 +139,9 @@ if st.sidebar.button("🧹 Clear Chat"):
     st.session_state.history = []
     st.rerun()
 
-# Download chat
 chat_text = format_chat_download(st.session_state.chat_history)
 st.sidebar.download_button(
-    label="📥 Download Chat (.txt)",
+    label=" Download Chat (.txt)",
     data=chat_text.encode("utf-8"),
     file_name=f"rag_chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
     mime="text/plain"
@@ -157,32 +149,26 @@ st.sidebar.download_button(
 
 st.sidebar.caption("Tip: Ask document-based questions for best results.")
 
-# ---------------- CHAT INPUT ----------------
 query = st.chat_input("Ask something from your document...")
 
-# ---------------- RENDER EXISTING CHAT ----------------
 for role, msg in st.session_state.chat_history:
     if role == "user":
         st.markdown(f'<div class="user-bubble">{msg}</div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="bot-bubble">{msg}</div>', unsafe_allow_html=True)
 
-# ---------------- MAIN ----------------
 if query:
     start = time.time()
 
-    # show user
     st.session_state.chat_history.append(("user", query))
     st.markdown(f'<div class="user-bubble">{query}</div>', unsafe_allow_html=True)
 
-    # ⏰ real-time block
     if is_realtime_query(query):
-        resp = "⏰ Real-time information is not available in this system."
+        resp = " Real-time information is not available in this system."
         st.session_state.chat_history.append(("assistant", resp))
         st.markdown(f'<div class="bot-bubble">{resp}</div>', unsafe_allow_html=True)
         st.stop()
 
-    # retrieve
     docs = safe_retrieve(db, query)
     if not docs:
         resp = "Answer not found in the document."
@@ -196,7 +182,6 @@ if query:
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     final_prompt = prompt.format(context=context, question=query, history=history)
 
-    # streaming
     placeholder = st.empty()
     full = ""
 
@@ -211,16 +196,14 @@ if query:
 
     answer = full.strip()
 
-    # save
     st.session_state.history += [f"User: {query}", f"Bot: {answer}"]
     st.session_state.chat_history.append(("assistant", answer))
 
-    # sources + highlight
-    with st.expander("📄 Source Chunks"):
+    with st.expander(" Source Chunks"):
         for i, d in enumerate(docs):
             st.code(d.page_content[:300])
 
-    with st.expander("🔍 Highlighted Context"):
+    with st.expander(" Highlighted Context"):
         st.markdown(safe_highlight(context, answer), unsafe_allow_html=True)
 
-    st.caption(f"⚡ Response time: {round(time.time() - start, 2)} sec")
+    st.caption(f" Response time: {round(time.time() - start, 2)} sec")
