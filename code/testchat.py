@@ -54,20 +54,17 @@ def count_tokens(text):
 
 
 def main():
-    print("⚡ OLLAMA RAG BOT READY\n")
+    print(" OLLAMA RAG BOT READY\n")
 
-    # 🔍 Embeddings
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-mpnet-base-v2"
     )
 
-    # 📚 Load DB
     db = Chroma(
         persist_directory=CHROMA_PATH,
         embedding_function=embeddings
     )
 
-    # 🧠 Local LLM
     model = ChatOllama(
         model="llama3",
         temperature=0
@@ -81,41 +78,36 @@ def main():
 
         start_time = time.time()
 
-        # 🔍 Retrieve relevant chunks
         results = db.similarity_search_with_score(query, k=5)
 
         filtered_docs = [
             doc for doc, score in results if score < 0.8
         ]
 
-        # fallback if too strict
         if not filtered_docs:
             filtered_docs = [doc for doc, _ in results[:3]]
 
-        # 🧠 Build context
         context = "\n\n".join([
             doc.page_content for doc in filtered_docs
         ])
 
         context = context[:1500]
 
-        # 🧾 Prompt
         prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
         final_prompt = prompt.format(context=context, question=query)
 
         input_tokens = count_tokens(final_prompt)
 
-        # 🤖 Generate response
         response = model.invoke(final_prompt)
         answer = clean_text(response.content)
 
         output_tokens = count_tokens(answer)
         end_time = time.time()
 
-        print("\n🤖 Answer:\n")
+        print("\n Answer:\n")
         print(answer)
 
-        print("\n📊 Stats:")
+        print("\n Stats:")
         print(f"Input Tokens: {input_tokens}")
         print(f"Output Tokens: {output_tokens}")
         print(f"Total Tokens: {input_tokens + output_tokens}")
